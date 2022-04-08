@@ -81,6 +81,57 @@ __DROP, TRUNCATE__
 TRUNCATE TABLE school.students;
 DROP TABLE school.students;
 DROP DATABASE school;
-```
+```  
 
 ## Nested Queries, Wildcard Operators, and other Clauses
+__WITH clause__  
+The `WITH` clause is used to define the CTE(Common Table Expressions). A common table expression is a named temporary result set that can be used multiple times.   
+The `WITH` clause may not be supported by MySQL 5.x but it is supported by  MySQL 8.0 and SQL Server.  
+So for this examples I will use SQL server.  
+```
+CREATE DATABASE lab;
+USE lab;
+GO;
+
+CREATE TABLE patients (
+  patient_id INT  NOT NULL IDENTITY(1,1) PRIMARY KEY,
+  firstname VARCHAR(20)  NOT NULL,
+  lastname VARCHAR(20) NOT NULL,
+  sex VARCHAR(7) CHECK(sex IN('Male','Female')) DEFAULT 'Male',
+  date_of_birth DATE,
+  phone VARCHAR(11),
+  email VARCHAR(60),
+);
+```
+
+```
+WITH some_patients AS
+ (SELECT * FROM patients WHERE email IS NOT NULL)
+SELECT * FROM some_patients WHERE sex = 'Male';
+```  
+You can has a number of CTE separated by comma.
+[More about WITH](https://www.educba.com/mysql-with/)  
+
+__CREATE TEMPORARY TABLE__  
+For MySQL 5.x which do not support the `WITH` class, you can use the temporary tables.  
+A temporary table us a special type of table that allows you to store a temporary result set which you can reuse several times in a single session.   
+```
+CREATE TEMPORARY TABLE some_patients (
+  patient_id INT(11),
+  firstname VARCHAR(20),
+  lastname VARCHAR(20),
+  date_of_birth DATE
+);
+INSERT INTO some_patients SELECT patient_id, firstname, lastname, date_of_birth FROM lab.patients WHERE date_of_birth BETWEEN '1990-01-01' AND '2000-01-01';
+SELECT * FROM some_patients;
+```
+To drop the temporary table while on the same query session:
+```
+DROP TEMPORARY TABLE IF EXISTS some_patients;
+```  
+You can create temporary table based on an existing table structure.  
+```
+CREATE TEMPORARY TABLE some_patients
+ SELECT patient_id, firstname, lastname date_of_birth FROM patients WHERE date_of_birth BETWEEN '1990-01-01' AND '2000-01-01';
+```
+[More about temporary table](https://www.mysqltutorial.org/mysql-temporary-table/#:~:text=In%20MySQL%2C%20a%20temporary%20table,statement%20with%20the%20JOIN%20clauses.)
