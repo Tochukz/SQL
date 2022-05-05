@@ -135,3 +135,28 @@ CREATE TEMPORARY TABLE some_patients
  SELECT patient_id, firstname, lastname date_of_birth FROM patients WHERE date_of_birth BETWEEN '1990-01-01' AND '2000-01-01';
 ```
 [More about temporary table](https://www.mysqltutorial.org/mysql-temporary-table/#:~:text=In%20MySQL%2C%20a%20temporary%20table,statement%20with%20the%20JOIN%20clauses.)
+
+
+__MUTIPLE JOIN AND MANY TO MANY RELATIONSHIP__  
+Here we join two tables which are having a many to many relationship.  
+The two table are `referrers` and `patients` and they have a `many-to-many` relationship using the bridge table `referrers_patients`;   
+
+Here we find the list of patients that have been referrers by each referrer.  
+```
+SELECT lab.referrers.referrer_id, title, lab.referrers.lastname, lab.patients.patient_id, lab.patients.firstname, lab.patients.lastname
+FROM lab.referrers
+INNER JOIN lab.referrers_patients ON lab.referrers.referrer_id = lab.referrers_patients.referrer_id
+INNER JOIN  lab.patients ON lab.patients.patient_id = lab.referrers_patients.patient_id
+ORDER BY referrer_id;
+```  
+The strategy is to JOIN the `referrers_patients` to `referrers` and the resulting table be JOINed to `patients`.  i.e `referrers` -> `referrers_patients` -> `patients`  
+
+What about if we want to see all the referrers that referred each patient so far?      
+```
+SELECT lab.patients.patient_id, lab.patients.firstname, lab.referrers.referrer_id, lab.referrers.title, lab.referrers.lastname
+FROM lab.patients
+INNER JOIN lab.referrers_patients ON lab.patients.patient_id = lab.referrers_patients.patient_id
+INNER JOIN lab.referrers ON lab.referrers.referrer_id = lab.referrers_patients.referrer_id
+ORDER BY patient_id;
+```  
+Here is JOIN query is `patients` -> `referrers_patients` -> `referrers`.  
